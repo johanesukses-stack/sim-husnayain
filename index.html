@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIM MI Husnayain Sleman</title>
+<meta name="description" content="Sistem Informasi Manajemen MI Husnayain Sleman — bisa dipasang sebagai aplikasi di HP dan laptop.">
+<meta name="theme-color" content="#0A2B26">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SIM Husnayain">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" crossorigin href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=optional">
+<style>
+  :root{
+    --teal-950:#0A2B26; --teal-800:#123F37; --teal-700:#175249;
+    --emas:#C79A3D; --emas-terang:#E4C273; --krem:#F6F5F0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--teal-950);overscroll-behavior:none;}
+  body{
+    display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;
+    font:400 14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--krem);-webkit-font-smoothing:antialiased;
+  }
+  [hidden]{display:none !important;}
+
+  /* ---------- Bingkai SIM ---------- */
+  .panggung{position:relative;flex:1;min-height:0;background:var(--krem);}
+  #sim{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--krem);}
+
+  /* ---------- Garis muat (perpindahan halaman) ---------- */
+  .bar{position:absolute;top:0;left:0;right:0;height:3px;overflow:hidden;z-index:5;opacity:0;
+    transition:opacity .2s ease;pointer-events:none;}
+  .bar.aktif{opacity:1;}
+  .bar::before,.garis-muat::before{content:"";position:absolute;top:0;bottom:0;left:-35%;width:35%;border-radius:3px;
+    background:linear-gradient(90deg,transparent,var(--emas),var(--emas-terang),transparent);
+    animation:geser 1.15s cubic-bezier(.4,0,.2,1) infinite;}
+  @keyframes geser{to{left:100%;}}
+
+  /* ---------- Pita "Pasang aplikasi" (hanya di tab browser) ---------- */
+  .pita{flex:none;display:flex;align-items:center;gap:10px;padding:8px 6px 8px 12px;
+    background:var(--teal-950);border-bottom:1px solid rgba(199,154,61,.28);}
+  .pita img{width:30px;height:30px;border-radius:8px;flex:none;}
+  .pita-teks{margin:0;flex:1;min-width:0;font-size:12px;line-height:1.3;color:rgba(246,245,240,.7);}
+  .pita-teks b{display:block;color:#fff;font-weight:600;font-size:13px;}
+
+  /* ---------- Tombol ---------- */
+  .tombol{appearance:none;border:0;border-radius:9px;padding:8px 14px;font:600 13px/1.2 Inter,system-ui,sans-serif;
+    cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+    transition:background-color .15s ease,box-shadow .15s ease;}
+  .tombol:focus-visible,.tombol-x:focus-visible{outline:2px solid var(--emas-terang);outline-offset:2px;}
+  .tombol-emas{background:var(--emas);color:var(--teal-950);}
+  .tombol-emas:hover{background:var(--emas-terang);}
+  .tombol-garis{background:transparent;color:var(--krem);box-shadow:inset 0 0 0 1px rgba(246,245,240,.32);}
+  .tombol-garis:hover{box-shadow:inset 0 0 0 1px rgba(246,245,240,.6);}
+  .tombol-besar{padding:12px 22px;font-size:14px;border-radius:11px;margin-top:18px;}
+  .tombol-x{appearance:none;background:transparent;border:0;color:var(--krem);opacity:.6;font-size:22px;
+    line-height:1;padding:4px 8px;cursor:pointer;border-radius:8px;}
+  .tombol-x:hover{opacity:1;}
+
+  /* ---------- Layar pembuka ---------- */
+  .layar{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px;text-align:center;
+    background:
+      radial-gradient(900px 420px at 88% -10%,rgba(199,154,61,.18),transparent 60%),
+      linear-gradient(160deg,var(--teal-950) 0%,var(--teal-800) 55%,var(--teal-700) 100%);
+    transition:opacity .32s ease,visibility .32s;}
+  .layar.hilang{opacity:0;visibility:hidden;}
+  .layar-isi{width:100%;max-width:380px;}
+  .logo{width:88px;height:88px;margin:0 auto 22px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.28));
+    animation:muncul .5s ease both;}
+  .logo svg{width:100%;height:100%;display:block;}
+  @keyframes muncul{from{opacity:0;transform:translateY(6px) scale(.97);}to{opacity:1;transform:none;}}
+  .eyebrow{font:500 11px/1 "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--emas);margin:0 0 12px;}
+  .judul{font-family:Fraunces,Georgia,"Noto Serif","Times New Roman",serif;font-weight:600;font-size:28px;
+    line-height:1.15;letter-spacing:-.01em;margin:0 0 10px;color:#fff;text-wrap:balance;}
+  .tagline{margin:0;color:rgba(255,255,255,.7);font-size:13.5px;}
+  .tagline b{color:rgba(255,255,255,.92);font-weight:600;}
+  .status{margin-top:32px;min-height:64px;}
+  .garis-muat{position:relative;width:132px;height:3px;margin:0 auto 12px;border-radius:3px;
+    background:rgba(255,255,255,.12);overflow:hidden;}
+  .status-teks{margin:0;font-size:12.5px;color:rgba(255,255,255,.62);}
+  .status-teks b{color:rgba(255,255,255,.9);font-weight:600;}
+  .bagian{display:none;}
+  .layar[data-keadaan="muat"] .b-muat,
+  .layar[data-keadaan="offline"] .b-offline,
+  .layar[data-keadaan="atur"] .b-atur,
+  .layar[data-keadaan="langsung"] .b-langsung{display:block;}
+  .kotak{padding:16px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+    color:rgba(255,255,255,.82);font-size:13px;text-align:left;}
+  .kotak p{margin:0 0 8px;}
+  .kotak p:last-child{margin-bottom:0;}
+  .kotak b{color:#fff;}
+  .kotak code{font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--emas-terang);}
+
+  /* ---------- Toast ---------- */
+  .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;
+    width:calc(100% - 32px);max-width:480px;padding:12px 8px 12px 16px;border-radius:14px;
+    background:var(--teal-950);color:var(--krem);border:1px solid rgba(199,154,61,.3);
+    box-shadow:0 14px 36px rgba(0,0,0,.35);display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    transform:translate(-50%,12px);opacity:0;transition:opacity .22s ease,transform .22s ease;}
+  .toast.tampil{opacity:1;transform:translate(-50%,0);}
+  .toast-teks{margin:0;flex:1 1 220px;font-size:13px;}
+  .toast-aksi{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 100%;}
+  .toast .tombol-x{position:absolute;top:4px;right:4px;}
+  .toast.ada-tutup{padding-right:40px;}
+
+  @media (min-width:700px){
+    .judul{font-size:32px;}
+    .toast-aksi{flex:0 1 auto;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .bar::before,.garis-muat::before{animation:none;left:0;width:100%;opacity:.55;}
+    .logo{animation:none;}
+    .layar,.toast{transition:none;}
+  }
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+
+<div class="pita" id="pita" hidden>
+  <img src="icons/favicon-64.png" alt="">
+  <p class="pita-teks"><b id="pitaJudul">Pasang SIM di perangkat ini</b><span id="pitaSub">Buka langsung dari ikonnya, tanpa address bar.</span></p>
+  <button type="button" class="tombol tombol-emas" id="pitaPasang">Pasang</button>
+  <button type="button" class="tombol-x" id="pitaTutup" aria-label="Tutup">×</button>
+</div>
+
+<main class="panggung">
+  <div class="bar" id="bar" aria-hidden="true"></div>
+  <iframe id="sim" title="SIM MI Husnayain Sleman"
+    allow="clipboard-read; clipboard-write; camera; microphone; geolocation; fullscreen; autoplay"></iframe>
+</main>
+
+<div class="layar" id="layar" data-keadaan="muat" role="status" aria-live="polite">
+  <div class="layar-isi">
+    <div class="logo" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="lg-bg" x1="0.32" y1="0" x2="0.68" y2="1"><stop offset="0" stop-color="#0A2B26"/><stop offset="0.55" stop-color="#123F37"/><stop offset="1" stop-color="#175249"/></linearGradient><radialGradient id="lg-glow" cx="0.86" cy="-0.06" r="0.85"><stop offset="0" stop-color="#C79A3D" stop-opacity="0.34"/><stop offset="0.62" stop-color="#C79A3D" stop-opacity="0"/></radialGradient><linearGradient id="lg-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4C273"/><stop offset="1" stop-color="#B8852D"/></linearGradient><clipPath id="lg-clip"><rect width="512" height="512" rx="114"/></clipPath></defs><g clip-path="url(#lg-clip)"><rect width="512" height="512" fill="url(#lg-bg)"/><rect width="512" height="512" fill="url(#lg-glow)"/><polygon points="256.00,84.00 306.38,134.38 377.62,134.38 377.62,205.62 428.00,256.00 377.62,306.38 377.62,377.62 306.38,377.62 256.00,428.00 205.62,377.62 134.38,377.62 134.38,306.38 84.00,256.00 134.38,205.62 134.38,134.38 205.62,134.38" fill="url(#lg-gold)"/><polygon points="256.00,99.00 301.98,144.98 367.02,144.98 367.02,210.02 413.00,256.00 367.02,301.98 367.02,367.02 301.98,367.02 256.00,413.00 210.02,367.02 144.98,367.02 144.98,301.98 99.00,256.00 144.98,210.02 144.98,144.98 210.02,144.98" fill="none" stroke="#0A2B26" stroke-opacity="0.22" stroke-width="3"/><path d="M50 0V66Q73 67 88.5 72.0Q104 77 112.5 95.0Q121 113 121 153V536Q121 563 122.5 588.0Q124 613 125 626Q109 625 85.0 624.5Q61 624 50 623V700H337V634Q315 633 299.0 628.0Q283 623 274.5 605.5Q266 588 266 547V391H541V536Q541 563 542.0 588.0Q543 613 545 626Q529 625 505.0 624.5Q481 624 470 623V700H757V634Q735 633 719.0 628.0Q703 623 694.5 605.5Q686 588 686 547V164Q686 137 685.0 112.0Q684 87 682 74Q698 76 722.5 76.5Q747 77 757 77V0H470V66Q493 67 508.5 72.0Q524 77 532.5 95.0Q541 113 541 153V315L266 312V164Q266 137 265.0 112.0Q264 87 262 74Q278 76 302.5 76.5Q327 77 337 77V0Z" fill="#0A2B26" transform="translate(176.45 325.00) scale(0.19714 -0.19714)"/></g></svg></div>
+    <p class="eyebrow">Sistem Informasi Madrasah</p>
+    <h1 class="judul">SIM MI Husnayain Sleman</h1>
+    <p class="tagline">Membina murid yang <b>Sholih</b> · <b>Mandiri</b> · <b>Berprestasi</b></p>
+
+    <div class="status">
+      <div class="bagian b-muat">
+        <div class="garis-muat"></div>
+        <p class="status-teks" id="muatTeks">Memuat SIM…</p>
+      </div>
+
+      <div class="bagian b-offline">
+        <div class="kotak">
+          <p><b>Tidak ada koneksi internet.</b></p>
+          <p>SIM membutuhkan internet untuk mengambil data terbaru. Periksa Wi-Fi atau data seluler, lalu coba lagi.</p>
+        </div>
+        <button type="button" class="tombol tombol-emas tombol-besar" id="cobaLagi">Coba lagi</button>
+      </div>
+
+      <div class="bagian b-atur">
+        <div class="kotak">
+          <p><b>Pintu aplikasi belum diatur.</b></p>
+          <p>Buka file <code>config.js</code> di folder ini, isi <code>urlSim</code> dengan alamat Web App SIM
+             (berakhiran <code>/exec</code>), lalu unggah ulang folder ini.</p>
+        </div>
+      </div>
+
+      <div class="bagian b-langsung">
+        <a class="tombol tombol-emas tombol-besar" id="bukaSim" href="#">Buka SIM</a>
+        <p class="status-teks" style="margin-top:14px">Untuk memasang: ketuk <b>Pasang</b> di atas, atau menu Chrome
+          <b>⋮</b> → <b>Instal aplikasi</b>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <p class="toast-teks" id="toastTeks"></p>
+  <div class="toast-aksi" id="toastAksi" hidden></div>
+  <button type="button" class="tombol-x" id="toastTutup" aria-label="Tutup" hidden>×</button>
+</div>
+
+<noscript>
+  <p style="position:fixed;inset:auto 16px 16px;z-index:40;margin:0;padding:12px 16px;border-radius:12px;background:#fff;color:#0A2B26">
+    Aktifkan JavaScript di browser untuk membuka SIM.</p>
+</noscript>
+
+<script>
+(function () {
+  'use strict';
+
+  var K = window.SIM_CONFIG || {};
+  function $(id) { return document.getElementById(id); }
+
+  var bingkai = $('sim'), layar = $('layar'), bar = $('bar'), pita = $('pita');
+  var toastEl = $('toast'), toastTeks = $('toastTeks'), toastAksi = $('toastAksi'), toastTutup = $('toastTutup');
+  var KUNCI_TERAKHIR = 'simPintu.halaman';      // sessionStorage: halaman terakhir (untuk muat ulang)
+  var KUNCI_PITA = 'simPintu.pitaDitutup';      // localStorage : kapan pita "Pasang" ditutup
+
+  function simpan(kunci, nilai, sesi) {
+    try { (sesi ? window.sessionStorage : window.localStorage).setItem(kunci, String(nilai)); } catch (e) {}
+  }
+  function ambil(kunci, sesi) {
+    try { return (sesi ? window.sessionStorage : window.localStorage).getItem(kunci); } catch (e) { return null; }
+  }
+
+  // ---------- Service worker ----------
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
+
+  var modeAplikasi = ['standalone', 'minimal-ui', 'window-controls-overlay', 'fullscreen'].some(function (m) {
+    return !!(window.matchMedia && window.matchMedia('(display-mode: ' + m + ')').matches);
+  }) || window.navigator.standalone === true;
+
+  // ---------- Toast ----------
+  var toastKunci = '', toastTimer = 0;
+  function tampilToast(teks, o) {
+    o = o || {};
+    clearTimeout(toastTimer);
+    toastKunci = o.kunci || '';
+    toastTeks.textContent = teks;
+    toastAksi.textContent = '';
+    (o.aksi || []).forEach(function (a) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tombol ' + (a.utama ? 'tombol-emas' : 'tombol-garis');
+      b.textContent = a.teks;
+      b.addEventListener('click', function () { sembunyiToast(); a.klik(); });
+      toastAksi.appendChild(b);
+    });
+    toastAksi.hidden = !(o.aksi && o.aksi.length);
+    toastTutup.hidden = !o.tetap;
+    toastEl.classList.toggle('ada-tutup', !!o.tetap);
+    toastEl.hidden = false;
+    requestAnimationFrame(function () { requestAnimationFrame(function () { toastEl.classList.add('tampil'); }); });
+    if (!o.tetap) toastTimer = setTimeout(function () { sembunyiToast(); }, o.durasi || 3500);
+  }
+  function sembunyiToast(kunci) {
+    if (kunci && kunci !== toastKunci) return;
+    clearTimeout(toastTimer);
+    toastKunci = '';
+    toastEl.classList.remove('tampil');
+    setTimeout(function () { if (!toastEl.classList.contains('tampil')) toastEl.hidden = true; }, 260);
+  }
+  toastTutup.addEventListener('click', function () { sembunyiToast(); });
+
+  // ---------- Layar pembuka & garis muat ----------
+  function aturLayar(keadaan) {
+    layar.setAttribute('data-keadaan', keadaan);
+    layar.hidden = false;
+    layar.classList.remove('hilang');
+  }
+  function tutupLayar() {
+    if (layar.hidden || layar.classList.contains('hilang')) return;
+    layar.classList.add('hilang');
+    setTimeout(function () { if (layar.classList.contains('hilang')) layar.hidden = true; }, 360);
+  }
+  function tampilBar(ya) { bar.classList.toggle('aktif', !!ya); }
+
+  // ---------- Pita "Pasang aplikasi" ----------
+  var tundaPasang = null;
+  var layarSentuh = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  $('pitaJudul').textContent = 'Pasang SIM di ' + (layarSentuh ? 'HP' : 'laptop') + ' ini';
+  $('pitaSub').textContent = layarSentuh
+    ? 'Buka langsung dari layar utama, tanpa address bar.'
+    : 'Buka dari desktop atau taskbar, seperti aplikasi biasa.';
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    tundaPasang = e;
+    var ditutup = Number(ambil(KUNCI_PITA)) || 0;
+    if (!modeAplikasi && (!ditutup || Date.now() - ditutup > 7 * 86400000)) pita.hidden = false;
+  });
+  $('pitaPasang').addEventListener('click', function () {
+    pita.hidden = true;
+    var p = tundaPasang;
+    tundaPasang = null;
+    if (!p) return;
+    p.prompt();
+    if (p.userChoice) {
+      p.userChoice.then(function (hasil) {
+        if (hasil && hasil.outcome === 'dismissed') simpan(KUNCI_PITA, Date.now());
+      }).catch(function () {});
+    }
+  });
+  $('pitaTutup').addEventListener('click', function () {
+    pita.hidden = true;
+    simpan(KUNCI_PITA, Date.now());
+  });
+  window.addEventListener('appinstalled', function () {
+    pita.hidden = true;
+    tampilToast('SIM sudah terpasang. Berikutnya cukup buka dari ikon “SIM Husnayain”.', { durasi: 6000 });
+  });
+
+  // ---------- Alamat SIM ----------
+  function urlSimDasar(u) {
+    var m = /^https:\/\/script\.google\.com\/[^?#]*?\/s\/[^\/?#]+\/(?:exec|dev)/i.exec(String(u || '').trim());
+    return (m && /\/macros\//i.test(m[0])) ? m[0] : '';
+  }
+  function urlSimSah(u) {
+    try {
+      var x = new URL(u);
+      return x.protocol === 'https:' && x.hostname === 'script.google.com' &&
+        /\/macros\//.test(x.pathname) && /\/s\/[^\/]+\/(?:exec|dev)\/?$/.test(x.pathname);
+    } catch (e) { return false; }
+  }
+  function bersihHalaman(p) { return String(p || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60); }
+  function halamanDariUrl(u) {
+    try { return bersihHalaman(new URL(u).searchParams.get('page')) || 'home'; } catch (e) { return 'home'; }
+  }
+  function denganTanda(u) {
+    try { var x = new URL(u); x.searchParams.set('pwa', '1'); return x.toString(); } catch (e) { return u; }
+  }
+
+  var SIM = urlSimDasar(K.urlSim);
+  if (!SIM) { aturLayar('atur'); return; }
+  var MODE = String(K.mode || '').toLowerCase() === 'langsung' ? 'langsung' : 'bingkai';
+  function urlHalaman(h) { return SIM + (h && h !== 'home' ? '?page=' + encodeURIComponent(h) : ''); }
+
+  // Halaman awal: ?page=... (dari pintasan ikon), atau halaman terakhir kalau pintu dimuat ulang.
+  var halamanAwal = '';
+  try { halamanAwal = bersihHalaman(new URLSearchParams(location.search).get('page')); } catch (e) {}
+  var jenisMuat = '';
+  try { jenisMuat = performance.getEntriesByType('navigation')[0].type; } catch (e) {}
+  if (jenisMuat === 'reload' || jenisMuat === 'back_forward') {
+    var terakhir = bersihHalaman(ambil(KUNCI_TERAKHIR, true));
+    if (terakhir) halamanAwal = terakhir;
+  }
+
+  // Mode cadangan: aplikasi hanya membuka alamat SIM apa adanya.
+  if (MODE === 'langsung') {
+    if (modeAplikasi) { location.replace(urlHalaman(halamanAwal)); return; }
+    $('bukaSim').href = urlHalaman(halamanAwal);
+    aturLayar('langsung');
+    return;
+  }
+
+  // ---------- Mode bingkai ----------
+  var nav = { id: 0, url: '', siap: false, halo: false };
+  var pernahSiap = false, menungguLogin = false;
+  var timerBantuan = 0, timerTutup = 0;
+
+  function muat(url) {
+    nav.id += 1;
+    nav.url = url;
+    nav.siap = false;
+    nav.halo = false;
+    tampilBar(true);
+    sembunyiToast('bantuan');
+    jadwalBantuan(nav.id);
+    bingkai.src = denganTanda(url);
+  }
+
+  function halamanSiap(d) {
+    nav.siap = true;
+    nav.halo = true;
+    var h = bersihHalaman(d.halaman) || 'home';
+    if (!nav.url || halamanDariUrl(nav.url) !== h) nav.url = urlHalaman(h);
+    simpan(KUNCI_TERAKHIR, h, true);
+    if (typeof d.judul === 'string' && d.judul) document.title = d.judul;
+    clearTimeout(timerBantuan);
+    tampilBar(false);
+    sembunyiToast('bantuan');
+    tutupLayar();
+    pernahSiap = true;
+  }
+
+  // Pesan hanya diterima dari halaman SIM yang benar-benar ada di dalam bingkai ini.
+  function dariBingkaiKita(sumber) {
+    var w = sumber;
+    for (var i = 0; i < 6 && w; i++) {
+      if (w === bingkai.contentWindow) return true;
+      var induk;
+      try { induk = w.parent; } catch (e) { return false; }
+      if (!induk || induk === w) return false;
+      w = induk;
+    }
+    return false;
+  }
+  function asalSah(asal) {
+    return asal === 'null' || asal === 'https://script.google.com' ||
+      /^https:\/\/[a-z0-9.-]+\.googleusercontent\.com$/i.test(asal);
+  }
+
+  window.addEventListener('message', function (ev) {
+    var d = ev.data;
+    if (!d || d.simPwa !== 1 || typeof d.jenis !== 'string') return;
+    if (!asalSah(ev.origin) || !dariBingkaiKita(ev.source)) return;
+
+    if (d.jenis === 'halo') {
+      nav.halo = true;
+      clearTimeout(timerBantuan);
+      try { ev.source.postMessage({ simPwa: 1, jenis: 'kenal' }, ev.origin === 'null' ? '*' : ev.origin); } catch (e) {}
+      if (typeof d.judul === 'string' && d.judul) document.title = d.judul;
+    } else if (d.jenis === 'siap') {
+      halamanSiap(d);
+    } else if (d.jenis === 'buka') {
+      if (typeof d.url === 'string' && urlSimSah(d.url)) muat(d.url);
+    } else if (d.jenis === 'pergi') {
+      // Halaman SIM sedang ditinggalkan (mis. tombol Kembali) -> tampilkan garis muat.
+      if (nav.siap) {
+        nav.id += 1;
+        nav.siap = false;
+        nav.halo = false;
+        tampilBar(true);
+        jadwalBantuan(nav.id);
+      }
+    }
+  });
+
+  bingkai.addEventListener('load', function () {
+    // Cadangan kalau halaman tidak mengirim 'siap' (mis. halaman login/izin Google).
+    var id = nav.id;
+    clearTimeout(timerTutup);
+    timerTutup = setTimeout(function () {
+      if (id === nav.id && !nav.siap) { tampilBar(false); tutupLayar(); }
+    }, 5000);
+    // Bingkai selesai dimuat tapi halaman SIM tidak "menyapa" -> kemungkinan halaman login/izin Google.
+    if (id === nav.id && !nav.halo) jadwalBantuan(id, 6000);
+  });
+
+  function jadwalBantuan(id, jedaMs) {
+    clearTimeout(timerBantuan);
+    timerBantuan = setTimeout(function () {
+      if (id !== nav.id || nav.siap || nav.halo || !navigator.onLine) return;
+      tutupLayar();
+      tampilBar(false);
+      tampilToast('SIM belum juga tampil. Pastikan Chrome sudah masuk (login) dengan akun Google madrasah, lalu muat ulang.', {
+        kunci: 'bantuan',
+        tetap: true,
+        aksi: [
+          { teks: 'Muat ulang', utama: true, klik: function () { muat(nav.url || SIM); } },
+          { teks: 'Masuk akun Google', klik: function () { menungguLogin = true; window.open(SIM, '_blank'); } },
+          { teks: 'Buka langsung', klik: function () { location.href = nav.url || SIM; } }
+        ]
+      });
+    }, jedaMs || 15000);
+  }
+
+  // Setelah login di tab lain, kembali ke aplikasi -> muat ulang otomatis.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && menungguLogin) {
+      menungguLogin = false;
+      muat(nav.url || SIM);
+    }
+  });
+
+  window.addEventListener('offline', function () {
+    tampilToast('Koneksi internet terputus. Data yang belum tersimpan bisa gagal dikirim.', { kunci: 'offline', tetap: true });
+  });
+  window.addEventListener('online', function () {
+    sembunyiToast('offline');
+    if (!pernahSiap) { mulai(true); return; }
+    if (!nav.siap) muat(nav.url || SIM);
+    tampilToast('Tersambung kembali.', { durasi: 2500 });
+  });
+
+  function mulai(paksa) {
+    if (!paksa && navigator.onLine === false) { aturLayar('offline'); return; }
+    aturLayar('muat');
+    muat(urlHalaman(halamanAwal));
+    var id = nav.id;
+    setTimeout(function () {
+      if (!pernahSiap && id === nav.id) $('muatTeks').textContent = 'Masih memuat… koneksi sedang lambat?';
+    }, 9000);
+  }
+  $('cobaLagi').addEventListener('click', function () { mulai(true); });
+
+  mulai(false);
+})();
+</script>
+</body>
+</html>

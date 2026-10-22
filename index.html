@@ -10,7 +10,24 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SIM Husnayain">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="manifest.webmanifest">
+<script>
+  // Ikon ke berapa? ?akun=2..4 = ikon aplikasi terpisah (warna sendiri) untuk akun guru lain.
+  (function () {
+    var slot = 1;
+    try {
+      var a = new URLSearchParams(location.search).get('akun');
+      if (/^[2-4]$/.test(a || '')) slot = Number(a);
+    } catch (e) {}
+    window.SIM_SLOT = slot;
+    document.documentElement.setAttribute('data-slot', String(slot));
+    var l = document.createElement('link');
+    l.rel = 'manifest';
+    l.href = slot > 1 ? 'manifest-' + slot + '.webmanifest' : 'manifest.webmanifest';
+    document.head.appendChild(l);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', ['', '#0A2B26', '#0B1F3A', '#3A0D14', '#241038'][slot]);
+  })();
+</script>
 <link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -23,6 +40,10 @@
     --teal-950:#0A2B26; --teal-800:#123F37; --teal-700:#175249;
     --emas:#C79A3D; --emas-terang:#E4C273; --krem:#F6F5F0;
   }
+  /* Warna per ikon (akun ke-2 biru, ke-3 marun, ke-4 ungu) */
+  :root[data-slot="2"]{--teal-950:#0B1F3A;--teal-800:#13315C;--teal-700:#1D4E89;}
+  :root[data-slot="3"]{--teal-950:#3A0D14;--teal-800:#5A1822;--teal-700:#7A2531;}
+  :root[data-slot="4"]{--teal-950:#241038;--teal-800:#36195A;--teal-700:#4B2A78;}
   *{box-sizing:border-box;}
   html,body{margin:0;height:100%;background:var(--teal-950);overscroll-behavior:none;}
   body{
@@ -113,13 +134,70 @@
   .toast .tombol-x{position:absolute;top:4px;right:4px;}
   .toast.ada-tutup{padding-right:40px;}
 
+  /* ---------- Lembar "Akun SIM" ---------- */
+  .lembar{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;
+    background:rgba(6,20,17,.55);}
+  .lembar-isi{position:relative;width:100%;max-width:520px;max-height:88vh;max-height:88dvh;overflow:auto;
+    background:#fff;color:#16241F;border-radius:18px 18px 0 0;
+    padding:18px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -12px 40px rgba(0,0,0,.25);
+    animation:naik .22s ease both;outline:none;}
+  @keyframes naik{from{transform:translateY(24px);opacity:.6;}to{transform:none;opacity:1;}}
+  .lembar-kepala{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}
+  .lembar-kepala h2{margin:0;font:600 19px/1.2 Fraunces,Georgia,"Noto Serif",serif;}
+  .lembar .tombol-x{color:#16241F;}
+  .lembar .tombol-x:focus-visible,.lembar .tombol:focus-visible{outline-color:var(--teal-700);}
+  .akun-kini{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:#F6F5F0;
+    border:1px solid #E3E0D3;}
+  .akun-kini > div{min-width:0;}
+  .avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;
+    background:var(--teal-950);color:var(--emas-terang);font:700 15px/1 Inter,system-ui,sans-serif;}
+  .akun-kini b{display:block;font-size:14px;}
+  .akun-kini span{display:block;font-size:12.5px;color:#6B7770;overflow-wrap:anywhere;}
+  .lembar p{font-size:13px;line-height:1.5;color:#3C4A44;margin:12px 0 0;}
+  .lembar details{margin-top:12px;border:1px solid #ECEAE0;border-radius:12px;padding:0 12px;}
+  .lembar summary{cursor:pointer;padding:12px 0;font:600 13.5px/1.3 Inter,system-ui,sans-serif;color:#16241F;}
+  .lembar ol{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.55;color:#3C4A44;}
+  .lembar li{margin:4px 0;}
+  .lembar details p{margin:0 0 12px;}
+  .slot-baris{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #ECEAE0;}
+  .slot-baris img{width:32px;height:32px;border-radius:8px;flex:none;}
+  .slot-baris .slot-teks{flex:1;min-width:0;}
+  .slot-baris b{display:block;font-size:12.5px;}
+  .slot-baris code{display:block;font:11.5px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:#6B7770;
+    overflow-wrap:anywhere;}
+  .label-ini{font:600 10px/1 Inter,system-ui,sans-serif;color:#16241F;background:#F4E9D2;border-radius:999px;
+    padding:3px 7px;margin-left:6px;vertical-align:1px;}
+  .tombol-kecil{padding:7px 12px;font-size:12px;border-radius:8px;flex:none;}
+  .akun-baris{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #ECEAE0;}
+  .akun-baris:first-child{border-top:0;}
+  .akun-baris span{flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere;}
+  .akun-baris span small{display:block;color:#6B7770;font-size:11.5px;}
+  .form-akun{display:flex;gap:8px;margin:6px 0 4px;}
+  .form-akun input{flex:1;min-width:0;padding:9px 11px;border:1px solid #D9D5C6;border-radius:9px;
+    font:400 13.5px/1.2 Inter,system-ui,sans-serif;color:#16241F;background:#fff;}
+  .form-akun input:focus{outline:2px solid var(--teal-700);outline-offset:1px;}
+  .lembar p.kecil{font-size:12px;color:#6B7770;margin:6px 0 12px;}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .tombol-teal{background:var(--teal-950);color:#fff;}
+  .tombol-teal:hover{background:var(--teal-700);}
+
+  /* ---------- Kunci: akun halaman & akun penyimpanan berbeda ---------- */
+  .kunci{position:fixed;inset:0;z-index:35;display:grid;place-items:center;padding:20px;background:rgba(6,20,17,.74);}
+  .kunci-kotak{width:100%;max-width:420px;background:#fff;color:#16241F;border-radius:16px;padding:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);}
+  .kunci-kotak h2{margin:0 0 8px;font:600 18px/1.25 Fraunces,Georgia,"Noto Serif",serif;color:#8A2F1F;}
+  .kunci-kotak p{margin:0 0 10px;font-size:13.5px;line-height:1.5;color:#3C4A44;overflow-wrap:anywhere;}
+  .kunci-aksi{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+
   @media (min-width:700px){
     .judul{font-size:32px;}
     .toast-aksi{flex:0 1 auto;}
+    .lembar{align-items:center;padding:24px;}
+    .lembar-isi{border-radius:18px;}
   }
   @media (prefers-reduced-motion:reduce){
     .bar::before,.garis-muat::before{animation:none;left:0;width:100%;opacity:.55;}
-    .logo{animation:none;}
+    .logo,.lembar-isi{animation:none;}
     .layar,.toast{transition:none;}
   }
 </style>
@@ -143,7 +221,7 @@
 <div class="layar" id="layar" data-keadaan="muat" role="status" aria-live="polite">
   <div class="layar-isi">
     <div class="logo" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="lg-bg" x1="0.32" y1="0" x2="0.68" y2="1"><stop offset="0" stop-color="#0A2B26"/><stop offset="0.55" stop-color="#123F37"/><stop offset="1" stop-color="#175249"/></linearGradient><radialGradient id="lg-glow" cx="0.86" cy="-0.06" r="0.85"><stop offset="0" stop-color="#C79A3D" stop-opacity="0.34"/><stop offset="0.62" stop-color="#C79A3D" stop-opacity="0"/></radialGradient><linearGradient id="lg-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4C273"/><stop offset="1" stop-color="#B8852D"/></linearGradient><clipPath id="lg-clip"><rect width="512" height="512" rx="114"/></clipPath></defs><g clip-path="url(#lg-clip)"><rect width="512" height="512" fill="url(#lg-bg)"/><rect width="512" height="512" fill="url(#lg-glow)"/><polygon points="256.00,84.00 306.38,134.38 377.62,134.38 377.62,205.62 428.00,256.00 377.62,306.38 377.62,377.62 306.38,377.62 256.00,428.00 205.62,377.62 134.38,377.62 134.38,306.38 84.00,256.00 134.38,205.62 134.38,134.38 205.62,134.38" fill="url(#lg-gold)"/><polygon points="256.00,99.00 301.98,144.98 367.02,144.98 367.02,210.02 413.00,256.00 367.02,301.98 367.02,367.02 301.98,367.02 256.00,413.00 210.02,367.02 144.98,367.02 144.98,301.98 99.00,256.00 144.98,210.02 144.98,144.98 210.02,144.98" fill="none" stroke="#0A2B26" stroke-opacity="0.22" stroke-width="3"/><path d="M50 0V66Q73 67 88.5 72.0Q104 77 112.5 95.0Q121 113 121 153V536Q121 563 122.5 588.0Q124 613 125 626Q109 625 85.0 624.5Q61 624 50 623V700H337V634Q315 633 299.0 628.0Q283 623 274.5 605.5Q266 588 266 547V391H541V536Q541 563 542.0 588.0Q543 613 545 626Q529 625 505.0 624.5Q481 624 470 623V700H757V634Q735 633 719.0 628.0Q703 623 694.5 605.5Q686 588 686 547V164Q686 137 685.0 112.0Q684 87 682 74Q698 76 722.5 76.5Q747 77 757 77V0H470V66Q493 67 508.5 72.0Q524 77 532.5 95.0Q541 113 541 153V315L266 312V164Q266 137 265.0 112.0Q264 87 262 74Q278 76 302.5 76.5Q327 77 337 77V0Z" fill="#0A2B26" transform="translate(176.45 325.00) scale(0.19714 -0.19714)"/></g></svg></div>
-    <p class="eyebrow">Sistem Informasi Madrasah</p>
+    <p class="eyebrow" id="eyebrow">Sistem Informasi Madrasah</p>
     <h1 class="judul">SIM MI Husnayain Sleman</h1>
     <p class="tagline">Membina murid yang <b>Sholih</b> · <b>Mandiri</b> · <b>Berprestasi</b></p>
 
@@ -184,6 +262,77 @@
   <button type="button" class="tombol-x" id="toastTutup" aria-label="Tutup" hidden>×</button>
 </div>
 
+<div class="kunci" id="kunci" role="alertdialog" aria-modal="true" aria-labelledby="kunciJudul" hidden>
+  <div class="kunci-kotak">
+    <h2 id="kunciJudul">Akun tidak sama, SIM dikunci sementara</h2>
+    <p>Halaman tampil sebagai <b id="kunciHalaman">—</b>, tetapi data akan tersimpan atas nama <b id="kunciRpc">—</b>.
+       Supaya data tidak tercatat atas nama guru lain, jangan mengisi apa pun dulu.</p>
+    <p id="kunciCatatan">Jadikan satu akun saja sebagai akun utama Chrome (lihat Cara ganti akun), lalu muat ulang.</p>
+    <div class="kunci-aksi">
+      <button type="button" class="tombol tombol-teal" id="kunciMuat">Muat ulang</button>
+      <button type="button" class="tombol tombol-garis" id="kunciCara" style="color:#16241F;box-shadow:inset 0 0 0 1px #C9C4B3">Cara ganti akun</button>
+    </div>
+  </div>
+</div>
+
+<div class="lembar" id="lembar" role="dialog" aria-modal="true" aria-labelledby="lembarJudul" hidden>
+  <div class="lembar-isi" tabindex="-1">
+    <div class="lembar-kepala">
+      <h2 id="lembarJudul">Akun SIM</h2>
+      <button type="button" class="tombol-x" id="lembarTutup" aria-label="Tutup">×</button>
+    </div>
+    <div class="akun-kini">
+      <div class="avatar" id="akunInisial" aria-hidden="true">?</div>
+      <div>
+        <b id="akunNama">Belum terbaca</b>
+        <span id="akunEmail">Buka Beranda SIM sekali, lalu lihat lagi.</span>
+      </div>
+    </div>
+    <p>Biasanya SIM memakai <b>akun utama Chrome</b> tempat ikon ini dipasang. Google tidak menjamin
+       Apps Script bisa memilih akun lain, jadi coba dulu di bawah; kalau gagal, pakai cara pasti.</p>
+
+    <details id="pilihAkun" open>
+      <summary>Pilih akun guru (coba dulu)</summary>
+      <div id="daftarAkun"></div>
+      <form class="form-akun" id="formAkun" novalidate>
+        <label class="sr" for="inputAkun">Email akun guru</label>
+        <input type="email" id="inputAkun" placeholder="email akun guru lain" autocomplete="email" inputmode="email" required>
+        <button type="submit" class="tombol tombol-teal tombol-kecil">Coba</button>
+      </form>
+      <p class="kecil">Akun itu harus sudah ada di Chrome ini. Google kadang mengabaikan pilihan akun untuk
+         Apps Script; aplikasi akan memeriksa hasilnya dan kembali ke akun utama bila gagal.</p>
+    </details>
+
+    <details id="caraGanti">
+      <summary>Ganti akun utama Chrome (cara pasti)</summary>
+      <ol>
+        <li>Buka Chrome yang dipakai memasang ikon ini, lalu ⋮ › <b>Setelan</b>.</li>
+        <li>Ketuk nama akun di bagian paling atas › <b>Keluar</b>.</li>
+        <li>Ketuk <b>Masuk ke Chrome</b>, pilih akun guru yang diinginkan.</li>
+        <li>Tutup aplikasi ini sepenuhnya (geser dari daftar aplikasi terbuka), lalu buka lagi.</li>
+      </ol>
+    </details>
+
+    <details>
+      <summary>Satu ikon untuk tiap guru (cara pasti)</summary>
+      <ol>
+        <li>Pasang <b>Chrome Beta</b> (bila perlu juga <b>Chrome Dev</b>) dari Play Store.</li>
+        <li>Di Chrome itu, masuk dengan <b>satu</b> akun guru.</li>
+        <li>Salin alamat ikon di bawah, buka di Chrome itu, lalu ketuk <b>Pasang</b>.</li>
+      </ol>
+      <div id="daftarIkon"></div>
+      <p>Tiap ikon punya warna sendiri: hijau ke-1, biru ke-2, marun ke-3, ungu ke-4.</p>
+    </details>
+
+    <details>
+      <summary>Di laptop</summary>
+      <p>Buat profil Chrome terpisah untuk tiap guru (foto profil di kanan atas Chrome › <b>Tambah</b>).
+         Masuk dengan akun guru di profil itu, buka alamat aplikasi, lalu <b>Instal</b>. Tiap profil
+         membuka SIM dengan akunnya sendiri.</p>
+    </details>
+  </div>
+</div>
+
 <noscript>
   <p style="position:fixed;inset:auto 16px 16px;z-index:40;margin:0;padding:12px 16px;border-radius:12px;background:#fff;color:#0A2B26">
     Aktifkan JavaScript di browser untuk membuka SIM.</p>
@@ -198,8 +347,17 @@
 
   var bingkai = $('sim'), layar = $('layar'), bar = $('bar'), pita = $('pita');
   var toastEl = $('toast'), toastTeks = $('toastTeks'), toastAksi = $('toastAksi'), toastTutup = $('toastTutup');
+  var SLOT = window.SIM_SLOT || 1;              // ikon ke-1..4 (lihat skrip di <head>)
+  var NAMA_IKON = SLOT > 1 ? 'Husnayain ' + SLOT : 'SIM Husnayain';
   var KUNCI_TERAKHIR = 'simPintu.halaman';      // sessionStorage: halaman terakhir (untuk muat ulang)
-  var KUNCI_PITA = 'simPintu.pitaDitutup';      // localStorage : kapan pita "Pasang" ditutup
+  var KUNCI_PITA = 'simPintu.pitaDitutup.' + SLOT;   // localStorage: kapan pita "Pasang" ditutup
+  var KUNCI_AKUN = 'simPintu.akun.' + SLOT;          // localStorage: akun terakhir yang dipakai ikon ini
+  var KUNCI_PILIHAN = 'simPintu.pilihan.' + SLOT;    // localStorage: akun yang DIMINTA (coba pilih akun)
+  var KUNCI_DAFTAR = 'simPintu.daftarAkun';          // localStorage: akun yang pernah terbaca di Chrome ini
+  var POLA_EMAIL = /^[^@\s"'<>]+@[^@\s"'<>]+\.[^@\s"'<>]+$/;
+  var pilihanAkun = '';
+  try { pilihanAkun = String(window.localStorage.getItem(KUNCI_PILIHAN) || ''); } catch (e) {}
+  if (!POLA_EMAIL.test(pilihanAkun)) pilihanAkun = '';
 
   function simpan(kunci, nilai, sesi) {
     try { (sesi ? window.sessionStorage : window.localStorage).setItem(kunci, String(nilai)); } catch (e) {}
@@ -264,10 +422,171 @@
   }
   function tampilBar(ya) { bar.classList.toggle('aktif', !!ya); }
 
+  // ---------- Warna & label ikon ke-2..4 ----------
+  var PALET = { 2: ['#0B1F3A', '#13315C', '#1D4E89'], 3: ['#3A0D14', '#5A1822', '#7A2531'], 4: ['#241038', '#36195A', '#4B2A78'] };
+  if (PALET[SLOT]) {
+    var stopLogo = document.querySelectorAll('#lg-bg stop');
+    PALET[SLOT].forEach(function (w, i) { if (stopLogo[i]) stopLogo[i].setAttribute('stop-color', w); });
+    Array.prototype.forEach.call(document.querySelectorAll('.logo [fill="#0A2B26"], .logo [stroke="#0A2B26"]'), function (el) {
+      if (el.getAttribute('fill') === '#0A2B26') el.setAttribute('fill', PALET[SLOT][0]);
+      if (el.getAttribute('stroke') === '#0A2B26') el.setAttribute('stroke', PALET[SLOT][0]);
+    });
+    $('eyebrow').textContent = 'Sistem Informasi Madrasah · Ikon ke-' + SLOT;
+    pita.querySelector('img').src = 'icons/icon-192-' + SLOT + '.png';
+  }
+
+  // ---------- Akun yang dipakai ikon ini ----------
+  function bacaAkun() {
+    try { var a = JSON.parse(ambil(KUNCI_AKUN) || 'null'); return (a && a.email) ? a : null; } catch (e) { return null; }
+  }
+  function namaAkun(a) {
+    if (!a) return '';
+    var n = String(a.nama || '').trim();
+    return n || String(a.email || '').split('@')[0];
+  }
+  function labelAkun(a) {
+    var n = namaAkun(a);
+    return (a && a.nama) ? n + ' (' + a.email + ')' : String((a && a.email) || n);
+  }
+  var akunKini = null;
+  var akunTersimpan = bacaAkun();
+  if (akunTersimpan) {
+    // Layar pembuka: "Membuka SIM sebagai <nama>…"
+    var teksMuat = $('muatTeks');
+    teksMuat.textContent = 'Membuka SIM sebagai ';
+    var bNama = document.createElement('b');
+    bNama.textContent = namaAkun(akunTersimpan);
+    teksMuat.appendChild(bNama);
+    teksMuat.appendChild(document.createTextNode('…'));
+  }
+
+  var judulDasar = document.title;
+  function aturJudul(j) {
+    if (typeof j === 'string' && j) judulDasar = j;
+    document.title = akunKini ? judulDasar + ' · ' + namaAkun(akunKini) : judulDasar;
+  }
+
+  function bacaDaftar() {
+    try {
+      var d = JSON.parse(ambil(KUNCI_DAFTAR) || '[]');
+      return Array.isArray(d) ? d.filter(function (x) { return x && POLA_EMAIL.test(String(x.email || '')); }) : [];
+    } catch (e) { return []; }
+  }
+  function catatDaftar(a) {
+    var d = bacaDaftar().filter(function (x) { return x.email !== a.email; });
+    d.unshift({ email: a.email, nama: a.nama || '', t: Date.now() });
+    simpan(KUNCI_DAFTAR, JSON.stringify(d.slice(0, 10)));
+  }
+
+  function isiPanelAkun() {
+    var a = akunKini || akunTersimpan;
+    $('akunInisial').textContent = a ? (namaAkun(a).charAt(0) || '?').toUpperCase() : '?';
+    $('akunNama').textContent = a ? namaAkun(a) + (SLOT > 1 ? ' · ikon ke-' + SLOT : '') : 'Belum terbaca';
+    $('akunEmail').textContent = a ? a.email : 'Buka Beranda SIM sekali, lalu lihat lagi.';
+
+    // Daftar akun yang pernah terbaca di Chrome ini -> tombol "Pakai"
+    var da = $('daftarAkun');
+    da.textContent = '';
+    var kini = a ? a.email : '';
+    bacaDaftar().forEach(function (x) {
+      var baris = document.createElement('div');
+      baris.className = 'akun-baris';
+      var sp = document.createElement('span');
+      sp.textContent = x.nama || x.email;
+      if (x.nama) {
+        var sm = document.createElement('small');
+        sm.textContent = x.email;
+        sp.appendChild(sm);
+      }
+      baris.appendChild(sp);
+      if (x.email === kini) {
+        var lab = document.createElement('em');
+        lab.className = 'label-ini';
+        lab.textContent = 'sedang dipakai';
+        baris.appendChild(lab);
+      } else {
+        var pakai = document.createElement('button');
+        pakai.type = 'button';
+        pakai.className = 'tombol tombol-teal tombol-kecil';
+        pakai.textContent = 'Pakai';
+        pakai.addEventListener('click', function () { cobaAkun(x.email); });
+        baris.appendChild(pakai);
+      }
+      da.appendChild(baris);
+    });
+    if (pilihanAkun) {
+      var kembali = document.createElement('button');
+      kembali.type = 'button';
+      kembali.className = 'tombol tombol-garis tombol-kecil';
+      kembali.style.cssText = 'color:#16241F;box-shadow:inset 0 0 0 1px #C9C4B3;margin:8px 0 4px';
+      kembali.textContent = 'Kembali ke akun utama Chrome';
+      kembali.addEventListener('click', kembaliKeAkunUtama);
+      da.appendChild(kembali);
+    }
+    var daftar = $('daftarIkon');
+    daftar.textContent = '';
+    for (var n = 1; n <= 4; n++) {
+      (function (n) {
+        var u = new URL('./', location.href);
+        if (n > 1) u.searchParams.set('akun', String(n));
+        var url = u.toString();
+        var baris = document.createElement('div');
+        baris.className = 'slot-baris';
+        var img = document.createElement('img');
+        img.src = n > 1 ? 'icons/icon-192-' + n + '.png' : 'icons/icon-192.png';
+        img.alt = '';
+        var teks = document.createElement('div');
+        teks.className = 'slot-teks';
+        var b = document.createElement('b');
+        b.textContent = 'Ikon ke-' + n;
+        if (n === SLOT) {
+          var ini = document.createElement('span');
+          ini.className = 'label-ini';
+          ini.textContent = 'ikon ini';
+          b.appendChild(ini);
+        }
+        var code = document.createElement('code');
+        code.textContent = url;
+        teks.appendChild(b);
+        teks.appendChild(code);
+        var salin = document.createElement('button');
+        salin.type = 'button';
+        salin.className = 'tombol tombol-teal tombol-kecil';
+        salin.textContent = 'Salin';
+        salin.addEventListener('click', function () {
+          var ok = function () { tampilToast('Alamat ikon ke-' + n + ' disalin. Tempel di Chrome lain, lalu ketuk Pasang.', { durasi: 4000 }); };
+          var gagal = function () {
+            var r = document.createRange();
+            r.selectNodeContents(code);
+            var s = window.getSelection();
+            s.removeAllRanges();
+            s.addRange(r);
+            tampilToast('Alamat sudah ditandai. Tekan lama lalu pilih Salin.', { durasi: 4000 });
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, gagal);
+          else gagal();
+        });
+        baris.appendChild(img);
+        baris.appendChild(teks);
+        baris.appendChild(salin);
+        daftar.appendChild(baris);
+      })(n);
+    }
+  }
+  function bukaPanelAkun() {
+    isiPanelAkun();
+    $('lembar').hidden = false;
+    $('lembar').querySelector('.lembar-isi').focus({ preventScroll: true });
+  }
+  function tutupPanelAkun() { $('lembar').hidden = true; }
+  $('lembarTutup').addEventListener('click', tutupPanelAkun);
+  $('lembar').addEventListener('click', function (e) { if (e.target === $('lembar')) tutupPanelAkun(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('lembar').hidden) tutupPanelAkun(); });
+
   // ---------- Pita "Pasang aplikasi" ----------
   var tundaPasang = null;
   var layarSentuh = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  $('pitaJudul').textContent = 'Pasang SIM di ' + (layarSentuh ? 'HP' : 'laptop') + ' ini';
+  $('pitaJudul').textContent = (SLOT > 1 ? 'Pasang ikon SIM ke-' + SLOT : 'Pasang SIM') + ' di ' + (layarSentuh ? 'HP' : 'laptop') + ' ini';
   $('pitaSub').textContent = layarSentuh
     ? 'Buka langsung dari layar utama, tanpa address bar.'
     : 'Buka dari desktop atau taskbar, seperti aplikasi biasa.';
@@ -296,7 +615,7 @@
   });
   window.addEventListener('appinstalled', function () {
     pita.hidden = true;
-    tampilToast('SIM sudah terpasang. Berikutnya cukup buka dari ikon “SIM Husnayain”.', { durasi: 6000 });
+    tampilToast('SIM sudah terpasang. Berikutnya cukup buka dari ikon “' + NAMA_IKON + '”.', { durasi: 6000 });
   });
 
   // ---------- Alamat SIM ----------
@@ -316,7 +635,13 @@
     try { return bersihHalaman(new URL(u).searchParams.get('page')) || 'home'; } catch (e) { return 'home'; }
   }
   function denganTanda(u) {
-    try { var x = new URL(u); x.searchParams.set('pwa', '1'); return x.toString(); } catch (e) { return u; }
+    try {
+      var x = new URL(u);
+      x.searchParams.set('pwa', '1');
+      if (pilihanAkun) x.searchParams.set('authuser', pilihanAkun);   // coba pilih akun (lihat panel Akun)
+      else x.searchParams.delete('authuser');
+      return x.toString();
+    } catch (e) { return u; }
   }
 
   var SIM = urlSimDasar(K.urlSim);
@@ -364,13 +689,130 @@
     var h = bersihHalaman(d.halaman) || 'home';
     if (!nav.url || halamanDariUrl(nav.url) !== h) nav.url = urlHalaman(h);
     simpan(KUNCI_TERAKHIR, h, true);
-    if (typeof d.judul === 'string' && d.judul) document.title = d.judul;
+    aturJudul(d.judul);
     clearTimeout(timerBantuan);
     tampilBar(false);
     sembunyiToast('bantuan');
     tutupLayar();
     pernahSiap = true;
   }
+
+  // ---------- Coba pilih akun (authuser) — selalu diperiksa hasilnya ----------
+  var percobaan = null, timerPercobaan = 0;
+  function batalkanPilihan() {
+    pilihanAkun = '';
+    simpan(KUNCI_PILIHAN, '');
+    percobaan = null;
+    clearTimeout(timerPercobaan);
+  }
+  function cobaAkun(email) {
+    email = String(email || '').trim().toLowerCase();
+    if (!POLA_EMAIL.test(email)) {
+      tampilToast('Tulis email akun guru dengan lengkap, mis. nama@mihusnayain.sch.id', { durasi: 4000 });
+      return;
+    }
+    if (akunKini && akunKini.email === email) {
+      tutupPanelAkun();
+      tampilToast('Ikon ini sudah memakai ' + email + '.', { durasi: 3000 });
+      return;
+    }
+    pilihanAkun = email;
+    simpan(KUNCI_PILIHAN, email);
+    percobaan = { email: email };
+    tutupPanelAkun();
+    $('inputAkun').value = '';
+    muat(nav.url || SIM);
+    tampilToast('Mencoba masuk sebagai ' + email + '…', { kunci: 'akun', durasi: 5000 });
+    clearTimeout(timerPercobaan);
+    timerPercobaan = setTimeout(function () {
+      if (!percobaan) return;
+      batalkanPilihan();
+      muat(nav.url || SIM);
+      tampilToast('Akun ' + email + ' tidak bisa dibuka di sini, kembali ke akun utama Chrome.', {
+        kunci: 'akun', tetap: true,
+        aksi: [{ teks: 'Lihat cara pasti', utama: true, klik: bukaCaraPasti }]
+      });
+    }, 20000);
+  }
+  function kembaliKeAkunUtama() {
+    batalkanPilihan();
+    tutupPanelAkun();
+    muat(nav.url || SIM);
+  }
+  function bukaCaraPasti() {
+    bukaPanelAkun();
+    $('caraGanti').open = true;
+  }
+  $('formAkun').addEventListener('submit', function (e) {
+    e.preventDefault();
+    cobaAkun($('inputAkun').value);
+  });
+
+  // ---------- Akun dari halaman SIM (hanya dikirim SIM ke alamat pintu ini) ----------
+  var akunDiumumkan = false;
+  function terimaAkun(d) {
+    var email = String(d.email || '').toLowerCase().slice(0, 120);
+    if (!POLA_EMAIL.test(email)) return;
+    var baru = { email: email, nama: String(d.nama || '').slice(0, 80), t: Date.now() };
+    var lama = bacaAkun();
+    if (!baru.nama && lama && lama.email === email) baru.nama = lama.nama || '';
+    var pembanding = akunKini || lama;   // akun sebelumnya: di sesi ini, atau saat ikon ini terakhir dipakai
+    var berubah = !!(pembanding && pembanding.email !== email);
+    akunKini = baru;
+    akunTersimpan = baru;
+    simpan(KUNCI_AKUN, JSON.stringify(baru));
+    catatDaftar(baru);
+    aturJudul();
+
+    if (pilihanAkun && email !== pilihanAkun) {
+      // Google mengabaikan akun yang diminta -> kembali ke akun utama (halaman ini sudah akun utama).
+      var diminta = pilihanAkun;
+      batalkanPilihan();
+      akunDiumumkan = true;
+      tampilToast('Google tetap memakai ' + email + '; pilihan ' + diminta + ' diabaikan di perangkat ini. ' +
+        'Pakai cara pasti: ganti akun utama Chrome, atau satu ikon untuk tiap guru.', {
+        kunci: 'akun', tetap: true,
+        aksi: [{ teks: 'Lihat cara pasti', utama: true, klik: bukaCaraPasti }]
+      });
+      return;
+    }
+    if (percobaan && email === percobaan.email) {
+      percobaan = null;
+      clearTimeout(timerPercobaan);
+      akunDiumumkan = true;
+      tampilToast('Sekarang masuk sebagai ' + labelAkun(baru) + '. Ikon ini akan memakai akun tersebut.', { kunci: 'akun', durasi: 4500 });
+      return;
+    }
+    if (berubah) {
+      tampilToast('Perhatian: ikon ini sekarang masuk sebagai ' + labelAkun(baru) + ', sebelumnya ' +
+        labelAkun(pembanding) + '. Pastikan akunnya benar sebelum mengisi data.', {
+        kunci: 'akun', tetap: true,
+        aksi: [
+          { teks: 'Ya, benar', utama: true, klik: function () {} },
+          { teks: 'Ganti akun', klik: bukaPanelAkun }
+        ]
+      });
+    } else if (!akunDiumumkan) {
+      tampilToast('Masuk sebagai ' + labelAkun(baru), { kunci: 'akun', durasi: 3200 });
+    }
+    akunDiumumkan = true;
+  }
+  function terimaCekAkun(d) {
+    if (d.cocok !== false) return;
+    var a = String(d.emailHalaman || ''), b = String(d.emailRpc || '');
+    if (!a || !b || a === b) return;
+    var dariPilihan = !!pilihanAkun;
+    if (dariPilihan) batalkanPilihan();   // pilihan akun ternyata tidak didukung penuh -> kembali ke akun utama
+    $('kunciHalaman').textContent = a;
+    $('kunciRpc').textContent = b;
+    $('kunciCatatan').textContent = dariPilihan
+      ? 'Google tidak mendukung penuh pilihan akun di perangkat ini, jadi aplikasi dikembalikan ke akun utama Chrome. Ketuk Muat ulang.'
+      : 'Jadikan satu akun saja sebagai akun utama Chrome (lihat Cara ganti akun), lalu muat ulang.';
+    $('kunci').hidden = false;
+    $('kunciMuat').focus();
+  }
+  $('kunciMuat').addEventListener('click', function () { $('kunci').hidden = true; muat(nav.url || SIM); });
+  $('kunciCara').addEventListener('click', bukaCaraPasti);
 
   // Pesan hanya diterima dari halaman SIM yang benar-benar ada di dalam bingkai ini.
   function dariBingkaiKita(sumber) {
@@ -398,9 +840,15 @@
       nav.halo = true;
       clearTimeout(timerBantuan);
       try { ev.source.postMessage({ simPwa: 1, jenis: 'kenal' }, ev.origin === 'null' ? '*' : ev.origin); } catch (e) {}
-      if (typeof d.judul === 'string' && d.judul) document.title = d.judul;
+      aturJudul(d.judul);
     } else if (d.jenis === 'siap') {
       halamanSiap(d);
+    } else if (d.jenis === 'akun') {
+      terimaAkun(d);
+    } else if (d.jenis === 'akun-cek') {
+      terimaCekAkun(d);
+    } else if (d.jenis === 'panel-akun') {
+      bukaPanelAkun();
     } else if (d.jenis === 'buka') {
       if (typeof d.url === 'string' && urlSimSah(d.url)) muat(d.url);
     } else if (d.jenis === 'pergi') {

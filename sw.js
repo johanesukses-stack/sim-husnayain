@@ -8,7 +8,7 @@
      dari Google (script.google.com), jadi data selalu yang terbaru.
    - Naikkan VERSI setiap kali isi folder pintu-aplikasi diubah.
    ===================================================================== */
-var VERSI = 'sim-pintu-v1';
+var VERSI = 'sim-pintu-v2';
 var CACHE_FONT = 'sim-pintu-font-v1';
 var INTI = [
   './',

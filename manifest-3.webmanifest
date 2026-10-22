@@ -1,0 +1,95 @@
+{
+  "id": "./?akun=3",
+  "name": "SIM MI Husnayain Sleman (ikon ke-3)",
+  "short_name": "Husnayain 3",
+  "description": "Sistem Informasi Manajemen MI Husnayain Sleman: absensi & piket, nilai, Qur'an, BPI, rapor, keuangan, dan layanan madrasah lainnya.",
+  "lang": "id",
+  "dir": "ltr",
+  "start_url": "./?akun=3",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#3A0D14",
+  "theme_color": "#3A0D14",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192-3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192-3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512-3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Absensi & Piket Harian",
+      "short_name": "Absensi",
+      "url": "./?akun=3&page=absensi",
+      "icons": [
+        {
+          "src": "icons/pintas-absensi.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Nilai Formatif & Weekly Plan",
+      "short_name": "Nilai",
+      "url": "./?akun=3&page=nilai",
+      "icons": [
+        {
+          "src": "icons/pintas-nilai.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Qur'an — Tahsin UMMI & Tahfidz",
+      "short_name": "Qur'an",
+      "url": "./?akun=3&page=quran",
+      "icons": [
+        {
+          "src": "icons/pintas-quran.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Jurnal Insight Guru",
+      "short_name": "Jurnal",
+      "url": "./?akun=3&page=jurnal",
+      "icons": [
+        {
+          "src": "icons/pintas-jurnal.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
